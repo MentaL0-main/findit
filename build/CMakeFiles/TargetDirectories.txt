@@ -1,0 +1,3 @@
+/home/mewfl/findit/build/CMakeFiles/findit.dir
+/home/mewfl/findit/build/CMakeFiles/edit_cache.dir
+/home/mewfl/findit/build/CMakeFiles/rebuild_cache.dir
