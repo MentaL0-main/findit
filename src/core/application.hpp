@@ -23,6 +23,7 @@ private:
     std::unique_ptr<Keyboard> m_keyboard;
     std::unique_ptr<Mouse> m_mouse;
     std::shared_ptr<Object> m_obj;
+    std::shared_ptr<ResourceManager> m_resource_manager;
 
     bool m_running = true;
 

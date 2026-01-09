@@ -21,15 +21,12 @@ void Application::run() {
 }
 
 void Application::init() {
-    m_window = std::make_unique<Window>(1200, 900, "FindIt: Beta");
-    m_renderer = std::make_unique<Renderer>(m_window->context);
+    m_window = std::make_unique<Window>(1200, 900, "FindIt: Beta", m_logger);
+    m_renderer = std::make_unique<Renderer>(m_window->context, m_logger);
     m_keyboard = std::make_unique<Keyboard>();
     m_mouse = std::make_unique<Mouse>();
-    m_obj = std::make_shared<Object>(std::vector<float> {
-                                        -0.5f, -0.5f, 0.0f,
-                                        0.5f, -0.5f, 0.0f,
-                                        0.0f, 0.5f, 0.0f,
-                                     });
+    m_resource_manager = std::make_unique<ResourceManager>(m_logger);
+    m_obj = std::make_shared<Object>(m_resource_manager->loadModel("../assets/models/pyramid.obj"), m_logger);
 
     m_renderer->set_clear_color(0.2f, 0.2f, 0.3f, 1.0f);
 }

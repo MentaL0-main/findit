@@ -1,3 +1,4 @@
+#include "../logger/logger.hpp"
 #include "renderer.hpp"
 #include "object.hpp"
 #include "shader.hpp"
@@ -9,20 +10,28 @@
 
 namespace findit {
 
-Renderer::Renderer(SDL_GLContext &gl_contex) {
+Renderer::Renderer(SDL_GLContext &gl_contex, std::shared_ptr<Logger> &logger) {
+    m_logger = logger;
+
     glewExperimental = GL_TRUE;
     GLenum err = glewInit();
     if (err != GLEW_OK) {
-        std::cerr << "ERROR: " << glewGetErrorString(err) << std::endl;
-        throw std::runtime_error("[!] Failed to init glew");
+        std::cerr << "[!] 'RENDERER' ERROR: " << glewGetErrorString(err) << std::endl;
+        throw std::runtime_error("[!] 'RENDERER' Failed to init glew");
     }
 
-    m_resource_manager = std::make_unique<ResourceManager>();
+    m_logger->log("[+] 'RENDERER' Init glew", m_logger->GREEN);
+
+    m_resource_manager = std::make_unique<ResourceManager>(m_logger);
+    m_logger->log("[+] 'RENDERER' Create resource manager object", m_logger->GREEN);
 
     m_shader = std::make_unique<Shader>(m_resource_manager->loadShader("../assets/shaders/vertex.glsl"),
-                                        m_resource_manager->loadShader("../assets/shaders/fragment.glsl"));
+                                        m_resource_manager->loadShader("../assets/shaders/fragment.glsl"),
+                                        m_logger);
+    m_logger->log("[+] 'RENDERER' Create shader object", m_logger->GREEN);
 
     glEnable(GL_DEPTH_TEST);
+    m_logger->log("[+] 'RENDERER' Enabled DEPTH_TEST", m_logger->GRAY);
 }
 
 void Renderer::set_clear_color(float r, float g, float b, float a) {

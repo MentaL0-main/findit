@@ -7,39 +7,56 @@
 
 namespace findit {
 
-Window::Window(int width, int height, const std::string &title) {
+Window::Window(int width, int height, const std::string &title, std::shared_ptr<Logger> &logger) {
     m_width = width;
     m_height = height;
     m_title = title;
+    m_logger = logger;
 
     if (!SDL_Init(SDL_INIT_VIDEO)) {
-        throw std::runtime_error("[!] Failed to init sdl3: " + std::string(SDL_GetError()));
+        throw std::runtime_error("[!] 'WINDOW' Failed to init sdl3: " + std::string(SDL_GetError()));
     }
+
+    m_logger->log("[+] 'WINDOW' Init sdl3", m_logger->GREEN);
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    
+    m_logger->log("[+] 'WINDOW' Attribute SDL_GL_CONTEXT_MAJOR_VERSION: 3", m_logger->GRAY);
+    m_logger->log("[+] 'WINDOW' Attribute SDL_GL_CONTEXT_MINOR_VERSION: 3", m_logger->GRAY);
+    m_logger->log("[+] 'WINDOW' Attribute SDL_GL_CONTEXT_PROFILE_CORE: SDL_GL_CONTEXT_PROFILE_CORE", m_logger->GRAY);
 
     m_native_window = SDL_CreateWindow(m_title.c_str(), m_width, m_height, SDL_WINDOW_OPENGL);
     if (!m_native_window) {
-        throw std::runtime_error("[!] Failed to init window: " + std::string(SDL_GetError()));
+        throw std::runtime_error("[!] 'WINDOW' Failed to create window: " + std::string(SDL_GetError()));
     }
+
+    m_logger->log("[+] 'WINDOW' Create window", m_logger->GREEN);
+
 
     context = SDL_GL_CreateContext(m_native_window);
     if (!context) {
-        throw std::runtime_error("[!] Failed to init context: " + std::string(SDL_GetError()));
+        throw std::runtime_error("[!] 'WINDOW' Failed to create context: " + std::string(SDL_GetError()));
     }
+
+    m_logger->log("[+] 'WINDOW' Create context", m_logger->GREEN);
 
     SDL_GL_MakeCurrent(m_native_window, context);
     if (context != SDL_GL_GetCurrentContext()) {
-        throw std::runtime_error("[!] Failed to make context to current: " + std::string(SDL_GetError()));
+        throw std::runtime_error("[!] 'WINDOW' Failed to make context to current: " + std::string(SDL_GetError()));
     }
+
+    m_logger->log("[+] 'WINDOW' Make context to current", m_logger->GREEN);
 }
 
-Window::~Window() {
+Window::~Window() {    
     SDL_GL_DestroyContext(context);
+    m_logger->log("[+] 'WINDOW' Destroy context to current", m_logger->GREEN);
     SDL_DestroyWindow(m_native_window);
+    m_logger->log("[+] 'WINDOW' Destroy window", m_logger->GREEN);
     SDL_Quit();
+    m_logger->log("[+] 'WINDOW' Quit sdl3", m_logger->GREEN);
 }
 
 void Window::set_size(std::pair<int, int> size) {

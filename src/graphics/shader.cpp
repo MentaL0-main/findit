@@ -1,11 +1,16 @@
 #include "shader.hpp"
+
 #include <stdexcept>
 
 namespace findit {
 
-Shader::Shader(const std::string &vs, const std::string &fs) {
+Shader::Shader(const std::string &vs, const std::string &fs, std::shared_ptr<Logger> &logger) {
+    m_logger = logger;
+
     const char* vs_c_str = vs.c_str();
     const char* fs_c_str = fs.c_str();
+    
+    m_logger->log("[+] 'SHADER' Convert shaders source to C-String", m_logger->GREEN);
 
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vs_c_str, NULL);
@@ -22,8 +27,11 @@ Shader::Shader(const std::string &vs, const std::string &fs) {
         
         std::string infoLogString = infoLog;
         delete[] infoLog;
-        throw std::runtime_error("[!] Vertex shader compilation error: " + infoLogString);
+        throw std::runtime_error("[!] 'SHADER' Vertex shader compilation error: " + infoLogString);
     }
+
+    m_logger->log("[+] 'SHADER' Compile vertex shader", m_logger->GREEN);
+
 
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fs_c_str, NULL);
@@ -39,14 +47,18 @@ Shader::Shader(const std::string &vs, const std::string &fs) {
         
         std::string infoLogString = infoLog;
         delete[] infoLog;
-        throw std::runtime_error("[!] Fragment shader compilation error: " + infoLogString);
+        throw std::runtime_error("[!] 'SHADER' Fragment shader compilation error: " + infoLogString);
         
     }
+
+    m_logger->log("[+] 'SHADER' Compile fragment shader", m_logger->GREEN);
 
     m_ID = glCreateProgram();
     glAttachShader(m_ID, vertexShader);
     glAttachShader(m_ID, fragmentShader);
     glLinkProgram(m_ID);
+
+    m_logger->log("[+] 'SHADER' Create shader program", m_logger->GREEN);
 
     glLinkProgram(m_ID);
     GLint linkSuccess;
@@ -60,11 +72,16 @@ Shader::Shader(const std::string &vs, const std::string &fs) {
         
         std::string infoLogString = infoLog;
         delete[] infoLog;
-        throw std::runtime_error("Program link error: " + infoLogString);
+        throw std::runtime_error(" 'SHADER' Program link error: " + infoLogString);
     }
+
+    m_logger->log("[+] 'SHADER' Link shader program", m_logger->GREEN);
 
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
+
+    m_logger->log("[+] 'SHADER' Delete shaders", m_logger->GREEN);
+
 }
 
 GLuint Shader::get_id() {

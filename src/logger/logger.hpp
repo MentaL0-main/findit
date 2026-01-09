@@ -6,7 +6,7 @@ namespace findit {
 
 class Logger {
 public:
-    Logger() = default;
+    Logger() { log("[+] 'LOGGER' Logger has created", GREEN); };
     void log(const std::string &message, const char* type);
 
     static constexpr const char* RED = "\033[31m";

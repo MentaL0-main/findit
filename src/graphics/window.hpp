@@ -1,6 +1,9 @@
 #pragma once
 
+#include "../logger/logger.hpp"
+
 #include <SDL3/SDL.h>
+#include <memory>
 #include <string>
 #include <utility>
 
@@ -8,7 +11,7 @@ namespace findit {
 
 class Window {
 public:
-    Window(int width, int hegiht, const std::string &title);
+    Window(int width, int hegiht, const std::string &title, std::shared_ptr<Logger> &logger);
     ~Window();
 
     SDL_Event event;
@@ -24,6 +27,7 @@ public:
 private:
     int m_width, m_height;
     std::string m_title;
+    std::shared_ptr<Logger> m_logger;
 
     SDL_Window* m_native_window;
 
