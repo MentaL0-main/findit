@@ -17,7 +17,7 @@ public:
     [[nodiscard]] bool is_mouse_clicked_to_rect(SDL_Rect rect);
 
     void update_data(SDL_Event &event);
-
+    void reset_relative();
 private:
     SDL_FPoint m_old_position = {-1.0f, -1.0f};
     SDL_FPoint m_position = {-1.0f, -1.0f};

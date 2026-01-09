@@ -1,6 +1,7 @@
 #include "mouse.hpp"
 
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_events.h>
 #include <SDL3/SDL_mouse.h>
 #include <stdexcept>
 
@@ -31,7 +32,6 @@ bool Mouse::is_mouse_clicked_to_rect(SDL_Rect rect) {
 }
 
 void Mouse::update_data(SDL_Event &event) {
-    m_old_position = m_position;
     SDL_GetMouseState(&m_position.x, &m_position.y);
 
     m_is_down_left = false;
@@ -41,9 +41,15 @@ void Mouse::update_data(SDL_Event &event) {
         if (event.button.button == SDL_BUTTON_LEFT) m_is_down_left = true;
         else if (event.button.type == SDL_BUTTON_RIGHT) m_is_down_right = true;
     }
+    
+    if (event.type == SDL_EVENT_MOUSE_MOTION) {
+        m_rel.x = event.motion.xrel;
+        m_rel.y = event.motion.yrel;
+    }
+}
 
+void Mouse::reset_relative() {
     m_rel = {0.0f, 0.0f};
-    SDL_GetRelativeMouseState(&m_rel.x, &m_rel.y);
 }
 
 }

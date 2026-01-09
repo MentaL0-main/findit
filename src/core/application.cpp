@@ -23,12 +23,19 @@ void Application::run() {
 void Application::init() {
     m_window = std::make_unique<Window>(1200, 900, "FindIt: Beta", m_logger);
     m_renderer = std::make_unique<Renderer>(m_window->context, m_logger);
-    m_keyboard = std::make_unique<Keyboard>();
-    m_mouse = std::make_unique<Mouse>();
+    m_keyboard = std::make_shared<Keyboard>();
+    m_mouse = std::make_shared<Mouse>();
     m_resource_manager = std::make_unique<ResourceManager>(m_logger);
-    m_obj = std::make_shared<Object>(m_resource_manager->loadModel("../assets/models/pyramid.obj"), m_logger);
+    m_camera = std::make_shared<Camera>(m_window->get_size().first, m_window->get_size().second, m_logger);
+    m_controller = std::make_unique<Controller>();
 
-    m_renderer->set_clear_color(0.2f, 0.2f, 0.3f, 1.0f);
+    for (int x = 0; x < 10; ++x)
+        for (int z = 0; z < 10; ++z)
+        m_objects.push_back(std::make_shared<Object>(glm::vec3{x*2, 0, z*2}, m_resource_manager->loadModel("../assets/models/pyramid.obj"), m_logger));
+
+    m_renderer->set_clear_color(0.5f, 0.5f, 1.0f, 1.0f);
+
+    m_window->set_cursor_visible(true);
 }
 
 void Application::mainloop() {
@@ -57,13 +64,19 @@ void Application::proccess_input() {
 }
 
 void Application::logic() {
+    m_controller->proccess(m_camera, m_keyboard, m_mouse);
 
+    m_camera->push(m_renderer->get_shader_id());
+    m_camera->update();
+
+    m_mouse->reset_relative();
 }
 
 void Application::render() {
     m_renderer->clear();
 
-    m_renderer->render_object(m_obj);
+    for (auto& obj : m_objects)
+        m_renderer->render_object(obj);
 
     m_renderer->present(m_window->get_native_window());
 }

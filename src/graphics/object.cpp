@@ -2,9 +2,22 @@
 
 namespace findit {
 
-Object::Object(std::vector<float> vertices, std::shared_ptr<Logger> &logger) {
+Object::Object(glm::vec3 position, std::vector<float> vertices, std::shared_ptr<Logger> &logger) {
     m_logger = logger;
     m_vertices_count = vertices.size();
+
+    m_position = position;
+    for (int i = 0; i < vertices.size(); i+=3) {
+        vertices[i] += m_position[0];
+    }
+    
+    for (int i = 1; i < vertices.size(); i+=3) {
+        vertices[i] += m_position[1];
+    }
+
+    for (int i = 2; i < vertices.size(); i+=3) {
+        vertices[i] += m_position[2];
+    }
 
     glGenVertexArrays(1, &m_VAO);
     glGenBuffers(1, &m_VBO);

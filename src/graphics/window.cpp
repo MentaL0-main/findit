@@ -1,6 +1,7 @@
 #include "window.hpp"
 
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_mouse.h>
 #include <SDL3/SDL_video.h>
 #include <stdexcept>
 #include <SDL3_image/SDL_image.h>
@@ -51,6 +52,7 @@ Window::Window(int width, int height, const std::string &title, std::shared_ptr<
 }
 
 Window::~Window() {    
+    set_cursor_visible(false);
     SDL_GL_DestroyContext(context);
     m_logger->log("[+] 'WINDOW' Destroy context to current", m_logger->GREEN);
     SDL_DestroyWindow(m_native_window);
@@ -78,6 +80,10 @@ std::string Window::get_title() {
 
 SDL_Window* Window::get_native_window() {
     return m_native_window;
+}
+
+void Window::set_cursor_visible(bool mode) {
+    SDL_SetWindowRelativeMouseMode(m_native_window, mode);
 }
 
 }

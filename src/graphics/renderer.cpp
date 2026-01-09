@@ -61,4 +61,8 @@ void Renderer::rectangle() {
     glEnd();
 }
 
+GLuint Renderer::get_shader_id() {
+    return m_shader->get_id();
+}
+
 }

@@ -10,7 +10,7 @@ namespace findit {
 
 class Object {
 public:
-    Object(std::vector<float> vertices, std::shared_ptr<Logger> &logger);
+    Object(glm::vec3 position, std::vector<float> vertices, std::shared_ptr<Logger> &logger);
     ~Object();
 
     [[nodiscard]] GLuint get_vao();

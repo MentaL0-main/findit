@@ -23,6 +23,8 @@ public:
     [[deprecated("Don't use test context function on the release.")]]
     void rectangle();
 
+    [[nodiscard]] GLuint get_shader_id();
+
 private:
     std::unique_ptr<ResourceManager> m_resource_manager;
     std::unique_ptr<Shader> m_shader;

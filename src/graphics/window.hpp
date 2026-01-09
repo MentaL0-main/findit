@@ -19,6 +19,7 @@ public:
 
     void set_size(std::pair<int, int> size);
     void set_title(const std::string &title);
+    void set_cursor_visible(bool mode);
 
     [[nodiscard]] std::pair<int, int> get_size();
     [[nodiscard]] std::string get_title();

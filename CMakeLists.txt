@@ -15,6 +15,8 @@ add_executable(findit src/main.cpp
                       src/input/keyboard.cpp
                       src/input/mouse.cpp
                       src/ResourceManager/ResourceManager.cpp
+                      src/camera/camera.cpp
+                      src/controller/controller.cpp
                       src/logger/logger.cpp)
 
 target_link_libraries(findit PRIVATE SDL3::SDL3)
