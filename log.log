@@ -1,0 +1,627 @@
+#include "core/application.hpp"
+#include "logger/logger.hpp"
+
+#include <exception>
+#include <memory>
+
+int main() {
+    std::shared_ptr<findit::Logger> logger = std::make_shared<findit::Logger>();
+    std::unique_ptr<findit::Application> app = std::make_unique<findit::Application>(logger);
+
+    try {
+        app->run();
+    } catch (std::exception &error) {
+        logger->log(error.what(), logger->RED);
+        return 1;
+    }
+
+    return 0;
+}#include "application.hpp"
+#include "../logger/logger.hpp"
+#include "../graphics/window.hpp"
+#include "../graphics/renderer.hpp"
+#include "../input/keyboard.hpp"
+
+#include <glm/ext/vector_float3.hpp>
+#include <memory>
+#include <SDL3/SDL.h>
+
+namespace findit {
+
+Application::Application(std::shared_ptr<Logger> &logger) {
+    m_logger = logger;
+}
+
+void Application::run() {
+    init();
+    mainloop();
+    cleanup();
+}
+
+void Application::init() {
+    m_window = std::make_unique<Window>(1200, 900, "FindIt: Beta");
+    m_renderer = std::make_unique<Renderer>(m_window->context);
+    m_keyboard = std::make_unique<Keyboard>();
+    m_mouse = std::make_unique<Mouse>();
+    m_obj = std::make_shared<Object>(glm::vec3{0.0f, 0.0f, 0.0f}, glm::vec3{1.0f, 0.0f, 0.0f}, m_obj_vertices);
+
+    m_renderer->set_clear_color(0.2f, 0.2f, 0.3f, 1.0f);
+}
+
+void Application::mainloop() {
+    while (m_running) {
+        while (SDL_PollEvent(&m_window->event)) {
+            if (m_window->event.type == SDL_EVENT_QUIT) {
+                m_running = false;
+            }
+
+            m_mouse->update_data(m_window->event);
+        }
+
+        proccess_input();
+        logic();
+        render();
+
+    }
+}
+
+void Application::cleanup() {}
+
+void Application::proccess_input() {
+    if (m_keyboard->is_key_down(SDL_SCANCODE_ESCAPE)) {
+        m_running = false;
+    }
+}
+
+void Application::logic() {
+
+}
+
+void Application::render() {
+    m_renderer->clear();
+
+    m_renderer->render_object(m_obj);
+
+    m_renderer->present(m_window->get_native_window());
+}
+
+}#pragma once
+
+#include "../logger/logger.hpp"
+#include "../graphics/window.hpp"
+#include "../graphics/renderer.hpp"
+#include "../graphics/object.hpp"
+#include "../input/keyboard.hpp"
+#include "../input/mouse.hpp"
+
+#include <memory>
+#include <vector>
+
+namespace findit {
+
+class Application {
+public:
+    Application(std::shared_ptr<Logger> &logger);
+    void run();
+
+private:
+    std::shared_ptr<Logger> m_logger;
+    std::unique_ptr<Window> m_window;
+    std::unique_ptr<Renderer> m_renderer;
+    std::unique_ptr<Keyboard> m_keyboard;
+    std::unique_ptr<Mouse> m_mouse;
+
+    std::vector<float> m_obj_vertices = {
+        -0.5f, -0.5f, 0.0f,
+        0.5f, -0.5f, 0.0f,
+        0.0f, 0.5f, 0.0f,
+    };
+
+    std::shared_ptr<Object> m_obj;
+
+    bool m_running = true;
+
+    void init();
+    void mainloop();
+    void cleanup();
+
+    void proccess_input();
+    void logic();
+    void render();
+};
+
+}#include "object.hpp"
+
+namespace findit {
+
+Object::Object(glm::vec3 position, glm::vec3 color, std::vector<float> &vertices) {
+    m_position = position;
+    m_color = color;
+    m_vertices_count = vertices.size();
+
+    glGenVertexArrays(1, &m_VAO);
+    glGenBuffers(1, &m_VBO);
+
+    glBindVertexArray(m_VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertices.size(), vertices.data(), GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+GLuint Object::get_vao() {
+    return m_VAO;
+}
+
+int Object::get_vertices_count() {
+    return m_vertices_count;
+}
+
+}#pragma once
+
+#include <GL/glew.h>
+#include <glm/glm.hpp>
+
+namespace findit {
+
+class Object {
+public:
+    Object(glm::vec3 position, glm::vec3 color, std::vector<float> &vertices);
+
+    [[nodiscard]] GLuint get_vao();
+    [[nodiscard]] int get_vertices_count();
+
+private:
+    glm::vec3 m_position;
+    glm::vec3 m_color;
+
+    int m_vertices_count;
+
+    GLuint m_VAO, m_VBO;
+};
+
+}#include "renderer.hpp"
+#include "object.hpp"
+#include "shader.hpp"
+
+#include <SDL3/SDL.h>
+#include <iostream>
+#include <memory>
+#include <stdexcept>
+
+namespace findit {
+
+Renderer::Renderer(SDL_GLContext &gl_contex) {
+    glewExperimental = GL_TRUE;
+    GLenum err = glewInit();
+    if (err != GLEW_OK) {
+        std::cerr << "ERROR: " << glewGetErrorString(err) << std::endl;
+        throw std::runtime_error("[!] Failed to init glew");
+    }
+
+    m_resource_manager = std::make_unique<ResourceManager>();
+
+    m_shader = std::make_unique<Shader>(m_resource_manager->loadShader("../assets/shaders/vertex.glsl"),
+                                        m_resource_manager->loadShader("../assets/shaders/fragment.glsl"));
+
+    glEnable(GL_DEPTH_TEST);
+}
+
+void Renderer::set_clear_color(float r, float g, float b, float a) {
+    glClearColor(r, g, b, a);
+}
+
+void Renderer::clear() {
+    glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void Renderer::present(SDL_Window* window) {
+    SDL_GL_SwapWindow(window);
+}
+
+void Renderer::render_object(std::shared_ptr<Object> &obj) {
+    glUseProgram(m_shader->get_id());
+    glBindVertexArray(obj->get_vao());
+    glDrawArrays(GL_TRIANGLES, 0, obj->get_vertices_count());
+}
+
+void Renderer::rectangle() {
+    glBegin(GL_TRIANGLE_FAN);
+        glColor3f(1.0f, 0.0f, 0.0f); glVertex2f(-1.0f, 1.0f);
+        glColor3f(0.0f, 1.0f, 0.0f); glVertex2f(0.0f, 1.0f);
+        glColor3f(0.0f, 0.0f, 1.0f); glVertex2f(0.0f, 0.0f);
+        glColor3f(0.0f, 1.0f, 1.0f); glVertex2f(-1.0f, 0.0f);
+    glEnd();
+}
+
+}#pragma once
+
+#include "object.hpp"
+#include "shader.hpp"
+#include "../ResourceManager/ResourceManager.hpp"
+
+#include <GL/glew.h>
+#include <SDL3/SDL.h>
+#include <memory>
+
+namespace findit {
+
+class Renderer {
+public:
+    Renderer(SDL_GLContext &gl_context);
+    void set_clear_color(float r, float g, float b, float a);
+    void clear();
+    void present(SDL_Window* window);
+
+    void render_object(std::shared_ptr<Object> &obj);
+    
+    [[deprecated("Don't use test function on the release.")]]
+    void rectangle();
+
+private:
+    std::unique_ptr<ResourceManager> m_resource_manager;
+    std::unique_ptr<Shader> m_shader;
+};
+
+}#include "shader.hpp"
+#include <stdexcept>
+
+namespace findit {
+
+Shader::Shader(const std::string &vs, const std::string &fs) {
+    const char* vs_c_str = vs.c_str();
+    const char* fs_c_str = fs.c_str();
+
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vs_c_str, NULL);
+    glCompileShader(vertexShader);
+    
+    GLint success;
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        GLint logLength;
+        glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &logLength);
+        
+        GLchar* infoLog = new GLchar[logLength + 1];
+        glGetShaderInfoLog(vertexShader, logLength, NULL, infoLog);
+        
+        std::string infoLogString = infoLog;
+        delete[] infoLog;
+        throw std::runtime_error("[!] Vertex shader compilation error: " + infoLogString);
+    }
+
+    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fs_c_str, NULL);
+    glCompileShader(fragmentShader);
+
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        GLint logLength;
+        glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &logLength);
+        
+        GLchar* infoLog = new GLchar[logLength + 1];
+        glGetShaderInfoLog(fragmentShader, logLength, NULL, infoLog);
+        
+        std::string infoLogString = infoLog;
+        delete[] infoLog;
+        throw std::runtime_error("[!] Fragment shader compilation error: " + infoLogString);
+        
+    }
+
+    m_ID = glCreateProgram();
+    glAttachShader(m_ID, vertexShader);
+    glAttachShader(m_ID, fragmentShader);
+    glLinkProgram(m_ID);
+
+    glLinkProgram(m_ID);
+    GLint linkSuccess;
+    glGetProgramiv(m_ID, GL_LINK_STATUS, &linkSuccess);
+    if (!linkSuccess) {
+        GLint logLength;
+        glGetProgramiv(m_ID, GL_INFO_LOG_LENGTH, &logLength);
+        
+        GLchar* infoLog = new GLchar[logLength + 1];
+        glGetProgramInfoLog(m_ID, logLength, NULL, infoLog);
+        
+        std::string infoLogString = infoLog;
+        delete[] infoLog;
+        throw std::runtime_error("Program link error: " + infoLogString);
+    }
+
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+}
+
+GLuint Shader::get_id() {
+    return m_ID;
+}
+
+}#pragma once
+
+#include <GL/glew.h>
+#include <string>
+
+namespace findit {
+
+class Shader {
+public:
+    Shader(const std::string &vs, const std::string &fs);
+    [[nodiscard]] GLuint get_id();
+
+private:
+    GLuint m_ID;
+
+};
+
+}#include "window.hpp"
+
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_video.h>
+#include <stdexcept>
+
+namespace findit {
+
+Window::Window(int width, int height, const std::string &title) {
+    m_width = width;
+    m_height = height;
+    m_title = title;
+
+    if (!SDL_Init(SDL_INIT_VIDEO)) {
+        throw std::runtime_error("[!] Failed to init sdl3: " + std::string(SDL_GetError()));
+    }
+
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+
+    m_native_window = SDL_CreateWindow(m_title.c_str(), m_width, m_height, SDL_WINDOW_OPENGL);
+    if (!m_native_window) {
+        throw std::runtime_error("[!] Failed to init window: " + std::string(SDL_GetError()));
+    }
+
+    context = SDL_GL_CreateContext(m_native_window);
+    if (!context) {
+        throw std::runtime_error("[!] Failed to init context: " + std::string(SDL_GetError()));
+    }
+
+    SDL_GL_MakeCurrent(m_native_window, context);
+    if (context != SDL_GL_GetCurrentContext()) {
+        throw std::runtime_error("[!] Failed to make context to current: " + std::string(SDL_GetError()));
+    }
+}
+
+Window::~Window() {
+    SDL_GL_DestroyContext(context);
+    SDL_DestroyWindow(m_native_window);
+    SDL_Quit();
+}
+
+void Window::set_size(std::pair<int, int> size) {
+    m_width = size.first;
+    m_height = size.second;
+}
+
+void Window::set_title(const std::string &title) {
+    m_title = title;
+}
+
+std::pair<int, int> Window::get_size() {
+    return std::pair<int, int>{m_width, m_height};
+}
+
+std::string Window::get_title() {
+    return m_title;
+}
+
+SDL_Window* Window::get_native_window() {
+    return m_native_window;
+}
+
+}#pragma once
+
+#include <SDL3/SDL.h>
+#include <string>
+#include <utility>
+
+namespace findit {
+
+class Window {
+public:
+    Window(int width, int hegiht, const std::string &title);
+    ~Window();
+
+    SDL_Event event;
+    SDL_GLContext context;
+
+    void set_size(std::pair<int, int> size);
+    void set_title(const std::string &title);
+
+    [[nodiscard]] std::pair<int, int> get_size();
+    [[nodiscard]] std::string get_title();
+    [[nodiscard]] SDL_Window* get_native_window();
+
+private:
+    int m_width, m_height;
+    std::string m_title;
+
+    SDL_Window* m_native_window;
+
+};
+    
+}#include "keyboard.hpp"
+
+#include <SDL3/SDL.h>
+
+namespace findit {
+
+bool Keyboard::is_key_down(SDL_Scancode code) {
+    return SDL_GetKeyboardState(NULL)[code];
+}
+
+bool Keyboard::is_key_up(SDL_Scancode code) {
+    return !is_key_down(code);
+}
+
+}#pragma once
+
+#include <SDL3/SDL.h>
+
+namespace findit {
+
+class Keyboard {
+public:
+    Keyboard() = default;
+
+    [[nodiscard]] bool is_key_down(SDL_Scancode code);
+    [[nodiscard]] bool is_key_up(SDL_Scancode code);
+
+};
+
+}#include "mouse.hpp"
+
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_mouse.h>
+#include <stdexcept>
+
+namespace findit {
+
+SDL_FPoint Mouse::get_mouse_position() {
+    return m_position;
+}
+
+SDL_FPoint Mouse::get_mouse_rel() {
+    return m_rel;
+}
+
+bool Mouse::is_mouse_down(bool side) {
+    if (side == MOUSE_BUTTON_LEFT) return m_is_down_left;
+    if (side == MOUSE_BUTTON_RIGHT) return m_is_down_right;
+    else throw std::runtime_error("[!] Error to is_mouse_down(): captured mouse button type. source: mouse.cpp");
+}
+
+bool Mouse::is_mouse_clicked_to_rect(SDL_Rect rect) {
+    if (m_position.x > rect.x &&
+        m_position.x < rect.x + rect.w &&
+        m_position.y > rect.y &&
+        m_position.y < rect.y + rect.h &&
+        m_is_down_left) return true;
+    
+    return false;
+}
+
+void Mouse::update_data(SDL_Event &event) {
+    m_old_position = m_position;
+    SDL_GetMouseState(&m_position.x, &m_position.y);
+
+    m_is_down_left = false;
+    m_is_down_right = false;
+
+    if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
+        if (event.button.button == SDL_BUTTON_LEFT) m_is_down_left = true;
+        else if (event.button.type == SDL_BUTTON_RIGHT) m_is_down_right = true;
+    }
+
+    m_rel = {0.0f, 0.0f};
+    SDL_GetRelativeMouseState(&m_rel.x, &m_rel.y);
+}
+
+}#pragma once
+
+#include <SDL3/SDL.h>
+
+#define MOUSE_BUTTON_LEFT 0
+#define MOUSE_BUTTON_RIGHT 1
+
+namespace findit {
+
+class Mouse {
+public:
+    Mouse() = default;
+
+    [[nodiscard]] SDL_FPoint get_mouse_position();
+    [[nodiscard]] SDL_FPoint get_mouse_rel();
+    [[nodiscard]] bool is_mouse_down(bool side);
+    [[nodiscard]] bool is_mouse_clicked_to_rect(SDL_Rect rect);
+
+    void update_data(SDL_Event &event);
+
+private:
+    SDL_FPoint m_old_position = {-1.0f, -1.0f};
+    SDL_FPoint m_position = {-1.0f, -1.0f};
+    SDL_FPoint m_rel;
+    bool m_is_down_left;
+    bool m_is_down_right;
+
+};
+
+}#include "logger.hpp"
+
+#include <iostream>
+
+namespace findit {
+
+void Logger::log(const std::string &message, const char* type) {
+    std::cout << type << message << RESET << std::endl;
+}
+
+}#pragma once
+
+#include <string>
+
+namespace findit {
+
+class Logger {
+public:
+    Logger() = default;
+    void log(const std::string &message, const char* type);
+
+    static constexpr const char* RED = "\033[31m";
+    static constexpr const char* GREEN = "\033[32m";
+    static constexpr const char* YELLOW = "\033[33m";
+    static constexpr const char* GRAY = "\033[90m";
+    static constexpr const char* RESET = "\033[0m";
+
+};
+
+}#include "ResourceManager.hpp"
+
+#include <fstream>
+#include <stdexcept>
+#include <string>
+
+namespace findit {
+
+std::string ResourceManager::loadShader(const std::string &path) {
+    std::fstream file(path);
+    if (!file.is_open()) {
+        throw std::runtime_error("[!] Failed to read shader file: " + std::string(path));
+    }
+
+    char data[1024];
+    file.read(data, 1024);
+
+    std::string result = data;
+    return result;
+}
+
+}#pragma once
+
+#include <string>
+
+namespace findit {
+
+class ResourceManager {
+public:
+    ResourceManager() = default;
+
+    [[nodiscard]] std::string loadShader(const std::string &path);
+
+private:
+
+};
+
+}

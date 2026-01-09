@@ -3,6 +3,7 @@
 #include "../logger/logger.hpp"
 #include "../graphics/window.hpp"
 #include "../graphics/renderer.hpp"
+#include "../graphics/object.hpp"
 #include "../input/keyboard.hpp"
 #include "../input/mouse.hpp"
 
@@ -21,6 +22,7 @@ private:
     std::unique_ptr<Renderer> m_renderer;
     std::unique_ptr<Keyboard> m_keyboard;
     std::unique_ptr<Mouse> m_mouse;
+    std::shared_ptr<Object> m_obj;
 
     bool m_running = true;
 

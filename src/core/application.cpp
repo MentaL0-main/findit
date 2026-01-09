@@ -4,6 +4,7 @@
 #include "../graphics/renderer.hpp"
 #include "../input/keyboard.hpp"
 
+#include <glm/ext/vector_float3.hpp>
 #include <memory>
 #include <SDL3/SDL.h>
 
@@ -24,8 +25,13 @@ void Application::init() {
     m_renderer = std::make_unique<Renderer>(m_window->context);
     m_keyboard = std::make_unique<Keyboard>();
     m_mouse = std::make_unique<Mouse>();
+    m_obj = std::make_shared<Object>(std::vector<float> {
+                                        -0.5f, -0.5f, 0.0f,
+                                        0.5f, -0.5f, 0.0f,
+                                        0.0f, 0.5f, 0.0f,
+                                     });
 
-    m_renderer->set_clear_color(0.0f, 0.0f, 0.0, 1.0f);
+    m_renderer->set_clear_color(0.2f, 0.2f, 0.3f, 1.0f);
 }
 
 void Application::mainloop() {
@@ -59,6 +65,8 @@ void Application::logic() {
 
 void Application::render() {
     m_renderer->clear();
+
+    m_renderer->render_object(m_obj);
 
     m_renderer->present(m_window->get_native_window());
 }
