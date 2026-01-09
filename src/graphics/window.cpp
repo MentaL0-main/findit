@@ -3,6 +3,7 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_video.h>
 #include <stdexcept>
+#include <SDL3_image/SDL_image.h>
 
 namespace findit {
 
