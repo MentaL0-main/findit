@@ -2,9 +2,10 @@
 
 namespace findit {
 
-Object::Object(glm::vec3 position, std::vector<float> vertices, std::shared_ptr<Logger> &logger) {
+Object::Object(glm::vec3 color, glm::vec3 position, std::vector<float> vertices, std::shared_ptr<Logger> &logger) {
     m_logger = logger;
     m_vertices_count = vertices.size();
+    m_color = color;
 
     m_position = position;
     for (int i = 0; i < vertices.size(); i+=3) {
@@ -43,14 +44,18 @@ Object::Object(glm::vec3 position, std::vector<float> vertices, std::shared_ptr<
 
 Object::~Object() {
     glDeleteBuffers(1, &m_VBO);
-    m_logger->log("[+] 'OBJECT' Delete VBO", m_logger->GREEN);
+    m_logger->log("[+] 'OBJECT' Delete VBO: " + std::to_string(m_VBO), m_logger->GREEN);
 
     glDeleteVertexArrays(1, &m_VAO);
-    m_logger->log("[+] 'OBJECT' Delete VAO", m_logger->GREEN);
+    m_logger->log("[+] 'OBJECT' Delete VAO: " + std::to_string(m_VAO), m_logger->GREEN);
 }
 
 GLuint Object::get_vao() {
     return m_VAO;
+}
+
+glm::vec3 Object::get_color() {
+    return m_color;
 }
 
 int Object::get_vertices_count() {

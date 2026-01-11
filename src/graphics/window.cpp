@@ -54,7 +54,7 @@ Window::Window(int width, int height, const std::string &title, std::shared_ptr<
 Window::~Window() {    
     set_cursor_visible(false);
     SDL_GL_DestroyContext(context);
-    m_logger->log("[+] 'WINDOW' Destroy context to current", m_logger->GREEN);
+    m_logger->log("[+] 'WINDOW' Destroy context", m_logger->GREEN);
     SDL_DestroyWindow(m_native_window);
     m_logger->log("[+] 'WINDOW' Destroy window", m_logger->GREEN);
     SDL_Quit();

@@ -16,8 +16,8 @@ public:
                   std::shared_ptr<Mouse> &mouse);
 
 private:
-    float m_speed = 0.4f;
-    float m_sens = 0.005f;
+    float m_speed = 0.1f;
+    float m_sens = 0.002f;
     float m_pitch = 0.0f;
 };
 

@@ -4,6 +4,7 @@
 #include "../graphics/renderer.hpp"
 #include "../input/keyboard.hpp"
 
+#include <ctime>
 #include <glm/ext/vector_float3.hpp>
 #include <memory>
 #include <SDL3/SDL.h>
@@ -21,6 +22,8 @@ void Application::run() {
 }
 
 void Application::init() {
+    srand(time(NULL));
+
     m_window = std::make_unique<Window>(1200, 900, "FindIt: Beta", m_logger);
     m_renderer = std::make_unique<Renderer>(m_window->context, m_logger);
     m_keyboard = std::make_shared<Keyboard>();
@@ -31,9 +34,9 @@ void Application::init() {
 
     for (int x = 0; x < 10; ++x)
         for (int z = 0; z < 10; ++z)
-        m_objects.push_back(std::make_shared<Object>(glm::vec3{x*2, 0, z*2}, m_resource_manager->loadModel("../assets/models/pyramid.obj"), m_logger));
+        m_objects.push_back(std::make_shared<Object>(glm::vec3{(float)x/10, (float)z/10, (float)(x+z)/10}, glm::vec3{x*2, 0, z*2}, m_resource_manager->loadModel("../assets/models/pyramid.obj"), m_logger));
 
-    m_renderer->set_clear_color(0.5f, 0.5f, 1.0f, 1.0f);
+    m_renderer->set_clear_color(0.7f, 0.7f, 1.0f, 1.0f);
 
     m_window->set_cursor_visible(true);
 }

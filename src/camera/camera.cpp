@@ -1,4 +1,5 @@
 #include "camera.hpp"
+
 #include <algorithm>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
@@ -20,26 +21,36 @@ Camera::Camera(int window_width, int window_height, std::shared_ptr<Logger> &log
                          glm::vec3{0.0f, 1.0f, 0.0f});
     
     m_model = glm::mat4(1.0f);
+
+    m_logger->log("[+] Create camera", m_logger->GREEN);
 }
 
 void Camera::move_forward(float step) {
-    m_position += m_forward * step;
-    m_center += m_forward * step;
+    glm::vec3 dir = m_forward;
+    dir.y = 0.0f;  // Только XZ плоскость
+    m_position += glm::normalize(dir) * step;
+    m_position.y = 1.8f;  // Высота глаз
 }
 
 void Camera::move_backward(float step) {
-    m_position += -m_forward * step;
-    m_center += -m_forward * step;
+    glm::vec3 dir = m_forward;
+    dir.y = 0.0f;
+    m_position -= glm::normalize(dir) * step;
+    m_position.y = 1.8f;
 }
 
 void Camera::move_left(float step) {
-    m_position += m_left * step;
-    m_center += m_left * step;
+    glm::vec3 dir = m_left;
+    dir.y = 0.0f;
+    m_position += glm::normalize(dir) * step;
+    m_position.y = 1.8f;
 }
 
 void Camera::move_right(float step) {
-    m_position += -m_left * step;
-    m_center += -m_left * step;
+    glm::vec3 dir = m_left;
+    dir.y = 0.0f;
+    m_position -= glm::normalize(dir) * step;
+    m_position.y = 1.8f;
 }
 
 void Camera::rotate_x(float angle) {

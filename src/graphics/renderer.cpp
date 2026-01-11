@@ -4,6 +4,7 @@
 #include "shader.hpp"
 
 #include <SDL3/SDL.h>
+#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <memory>
 #include <stdexcept>
@@ -48,6 +49,11 @@ void Renderer::present(SDL_Window* window) {
 
 void Renderer::render_object(std::shared_ptr<Object> &obj) {
     glUseProgram(m_shader->get_id());
+    const float* vector_data = glm::value_ptr(obj->get_color());
+    glUniform3f(glGetUniformLocation(m_shader->get_id(), "uObjectColor"),
+                                     vector_data[0],
+                                     vector_data[0],
+                                     vector_data[0]);
     glBindVertexArray(obj->get_vao());
     glDrawArrays(GL_TRIANGLES, 0, obj->get_vertices_count()/3);
 }
