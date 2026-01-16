@@ -33,6 +33,9 @@ Object::Object(glm::vec3 color, glm::vec3 position, std::vector<float> vertices,
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     m_logger->log("[+] 'OBJECT' Setup buffers", m_logger->GREEN);
 

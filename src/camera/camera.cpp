@@ -87,6 +87,9 @@ void Camera::push(GLuint id) {
     glUniformMatrix4fv(glGetUniformLocation(id, "uModel"),     1, GL_FALSE, glm::value_ptr(m_model));
     glUniformMatrix4fv(glGetUniformLocation(id, "uView"),      1, GL_FALSE, glm::value_ptr(m_view));
     glUniformMatrix4fv(glGetUniformLocation(id, "uProjection"), 1, GL_FALSE, glm::value_ptr(m_projection));
+
+    glUniform3f(glGetUniformLocation(id, "lightPos"), 3.2f, 4.0f, 3.2f);
+    glUniform3f(glGetUniformLocation(id, "lightColor"), 1.0f, 1.0f, 1.0f);
 }
 
 }
