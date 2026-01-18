@@ -32,10 +32,6 @@ void Application::init() {
     m_camera = std::make_shared<Camera>(m_window->get_size().first, m_window->get_size().second, m_logger);
     m_controller = std::make_unique<Controller>();
 
-    for (int x = 0; x < 10; ++x)
-        for (int z = 0; z < 10; ++z)
-        m_objects.push_back(std::make_shared<Object>(glm::vec3{0.3f, 0.3f, 0.3f}, glm::vec3{x*2, 0, z*2}, m_resource_manager->loadModel("../assets/models/pyramid.obj"), m_logger));
-
     m_renderer->set_clear_color(0.7f, 0.7f, 1.0f, 1.0f);
 
     m_window->set_cursor_visible(true);
@@ -77,9 +73,6 @@ void Application::logic() {
 
 void Application::render() {
     m_renderer->clear();
-
-    for (auto& obj : m_objects)
-        m_renderer->render_object(obj);
 
     m_renderer->present(m_window->get_native_window());
 }
