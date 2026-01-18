@@ -1,6 +1,5 @@
 #pragma once
 
-#include "object.hpp"
 #include "shader.hpp"
 #include "../ResourceManager/ResourceManager.hpp"
 #include "../logger/logger.hpp"
@@ -17,8 +16,6 @@ public:
     void set_clear_color(float r, float g, float b, float a);
     void clear();
     void present(SDL_Window* window);
-
-    void render_object(std::shared_ptr<Object> &obj);
     
     [[deprecated("Don't use test context function on the release.")]]
     void rectangle();

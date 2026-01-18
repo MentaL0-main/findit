@@ -3,11 +3,11 @@
 #include "../logger/logger.hpp"
 #include "../graphics/window.hpp"
 #include "../graphics/renderer.hpp"
-#include "../graphics/object.hpp"
 #include "../input/keyboard.hpp"
 #include "../input/mouse.hpp"
 #include "../camera/camera.hpp"
 #include "../controller/controller.hpp"
+#include "../voxel/chunk.hpp"
 
 #include <memory>
 
@@ -27,8 +27,7 @@ private:
     std::shared_ptr<ResourceManager> m_resource_manager;
     std::shared_ptr<Camera> m_camera;
     std::unique_ptr<Controller> m_controller;
-
-    std::vector<std::shared_ptr<Object>> m_objects;
+    std::unique_ptr<Chunk> m_chunk;
 
     bool m_running = true;
 

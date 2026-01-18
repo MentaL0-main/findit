@@ -10,13 +10,13 @@ add_executable(findit src/main.cpp
                       src/core/application.cpp
                       src/graphics/window.cpp
                       src/graphics/renderer.cpp
-                      src/graphics/object.cpp
                       src/graphics/shader.cpp
                       src/input/keyboard.cpp
                       src/input/mouse.cpp
                       src/ResourceManager/ResourceManager.cpp
                       src/camera/camera.cpp
                       src/controller/controller.cpp
+                      src/voxel/chunk.cpp
                       src/logger/logger.cpp)
 
 target_link_libraries(findit PRIVATE SDL3::SDL3)

@@ -24,6 +24,11 @@ void Application::run() {
 void Application::init() {
     srand(time(NULL));
 
+    std::vector<Voxel> voxels;
+    for (int i = 0; i < 10; ++i)
+        for (int j = 0; j < 10; ++j)
+            voxels.push_back({{i, j, 0}, {1, 1, 0}, true});
+
     m_window = std::make_unique<Window>(1200, 900, "FindIt: Beta", m_logger);
     m_renderer = std::make_unique<Renderer>(m_window->context, m_logger);
     m_keyboard = std::make_shared<Keyboard>();
@@ -31,10 +36,11 @@ void Application::init() {
     m_resource_manager = std::make_unique<ResourceManager>(m_logger);
     m_camera = std::make_shared<Camera>(m_window->get_size().first, m_window->get_size().second, m_logger);
     m_controller = std::make_unique<Controller>();
+    m_chunk = std::make_unique<Chunk>(voxels);
 
     m_renderer->set_clear_color(0.7f, 0.7f, 1.0f, 1.0f);
-
     m_window->set_cursor_visible(true);
+
 }
 
 void Application::mainloop() {
@@ -73,6 +79,8 @@ void Application::logic() {
 
 void Application::render() {
     m_renderer->clear();
+
+    m_chunk->render(m_renderer->get_shader_id());
 
     m_renderer->present(m_window->get_native_window());
 }

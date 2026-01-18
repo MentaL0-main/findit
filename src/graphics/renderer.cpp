@@ -1,6 +1,5 @@
 #include "../logger/logger.hpp"
 #include "renderer.hpp"
-#include "object.hpp"
 #include "shader.hpp"
 
 #include <SDL3/SDL.h>
@@ -45,9 +44,6 @@ void Renderer::clear() {
 
 void Renderer::present(SDL_Window* window) {
     SDL_GL_SwapWindow(window);
-}
-
-void Renderer::render_object(std::shared_ptr<Object> &obj) {
 }
 
 void Renderer::rectangle() {
