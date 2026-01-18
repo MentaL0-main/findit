@@ -1,3 +1,3 @@
 # FintIt 
 
-## FindIt - 3д игра написанная на modern C++.
+## FindIt - воксельная 3д игра написанная на modern C++.
