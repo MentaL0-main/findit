@@ -38,6 +38,8 @@ private:
     void proccess_input();
     void logic();
     void render();
+    
+    float get_fps();
 };
 
 }

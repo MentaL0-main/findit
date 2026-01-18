@@ -30,10 +30,12 @@ Chunk::Chunk(std::vector<Voxel> voxels) {
 
 void Chunk::render(GLuint shaderID) {
     for (int i = 0; i < m_voxels.size(); ++i) {
+        if (!m_voxels[i].visible) continue;
+
         glm::mat4 model = glm::translate(glm::mat4(1.0f), m_voxels[i].position);
 
         glUniformMatrix4fv(glGetUniformLocation(shaderID, "uModel"), 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(glGetUniformLocation(shaderID, "uObjectColor"), 1, GL_FALSE, glm::value_ptr(m_voxels[i].color));
+        glUniform3fv(glGetUniformLocation(shaderID, "uObjectColor"), 1, glm::value_ptr(m_voxels[i].color));
         
         glBindVertexArray(m_vao);
         glDrawArrays(GL_TRIANGLES, 0, 36);

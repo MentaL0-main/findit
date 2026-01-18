@@ -6,8 +6,11 @@
 
 #include <ctime>
 #include <glm/ext/vector_float3.hpp>
+#include <iostream>
 #include <memory>
 #include <SDL3/SDL.h>
+#include <chrono>
+#include <ostream>
 
 namespace findit {
 
@@ -25,10 +28,17 @@ void Application::init() {
     srand(time(NULL));
 
     std::vector<Voxel> voxels;
-    for (int i = 0; i < 10; ++i)
-        for (int j = 0; j < 10; ++j)
-            voxels.push_back({{i, j, 0}, {1, 1, 0}, true});
+    for (int i = 0; i < 16; ++i)
+        for (int j = 0; j < 16; ++j)
+            for (int k = 0; k < 16; ++k) {
+                bool visible = false;
+                if (i == 0 || i == 15 ||
+                    j == 0 || j == 15 ||
+                    k == 0 || k == 15)
+                    visible = true;
 
+                voxels.push_back({glm::vec3{i, j, k}, glm::vec3{i/10, j/10, k/10}, visible});
+            }
     m_window = std::make_unique<Window>(1200, 900, "FindIt: Beta", m_logger);
     m_renderer = std::make_unique<Renderer>(m_window->context, m_logger);
     m_keyboard = std::make_shared<Keyboard>();
@@ -74,6 +84,8 @@ void Application::logic() {
     m_camera->push(m_renderer->get_shader_id());
     m_camera->update();
 
+    get_fps();
+
     m_mouse->reset_relative();
 }
 
@@ -83,6 +95,30 @@ void Application::render() {
     m_chunk->render(m_renderer->get_shader_id());
 
     m_renderer->present(m_window->get_native_window());
+}
+
+float Application::get_fps() {
+    static int frameCount = 0; // Счетчик кадров
+    static float fps = 0.0f; // Значение FPS
+    static auto lastTime = std::chrono::high_resolution_clock::now(); // Последнее время
+
+    auto currentTime = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<float> elapsed = currentTime - lastTime;
+
+    // Увеличиваем счетчик кадров
+    frameCount++;
+
+    // Если прошла одна секунда, обновите FPS
+    if (elapsed.count() >= 1.0f) {
+        fps = static_cast<float>(frameCount); // Устанавливаем значение FPS
+        frameCount = 0; // Сбрасываем счетчик
+        lastTime = currentTime; // Обновляем последнее время
+
+        // Выводим FPS в консоль (необязательно)
+        std::cout << "[*] FPS: " << fps << std::endl;
+    }
+
+    return fps; // Возвращаем текущее значение FPS
 }
 
 }
