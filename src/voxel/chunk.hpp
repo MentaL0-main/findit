@@ -9,6 +9,19 @@
 #include <unordered_set>
 #include <functional>
 
+namespace std {
+    template<> struct hash<glm::ivec3> {
+        size_t operator()(glm::ivec3 const& v) const noexcept {
+            uint64_t seed = 0;
+            seed ^= std::hash<int>()(v.x) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+            seed ^= std::hash<int>()(v.y) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+            seed ^= std::hash<int>()(v.z) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+            return seed;
+        }
+    };
+}
+
+
 namespace findit {
 
 struct Vec3Hash {
@@ -30,7 +43,7 @@ class Chunk {
 public:
     Chunk();
 
-    void render(GLuint shaderID);
+    void render(GLuint shaderID, glm::vec3 pos);
     void init_voxels();
     bool is_visible(const Voxel &vox);
     void update_visiblity();

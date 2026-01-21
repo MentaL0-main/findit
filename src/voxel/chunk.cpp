@@ -15,6 +15,7 @@ namespace findit {
 
 Chunk::Chunk() {
     init_voxels();
+    update_visiblity();
 
     glGenVertexArrays(1, &m_vao);
     glGenBuffers(1, &m_vbo);
@@ -30,11 +31,11 @@ Chunk::Chunk() {
     glBindVertexArray(0);
 }
 
-void Chunk::render(GLuint shaderID) {
-    update_visiblity();
+void Chunk::render(GLuint shaderID, glm::vec3 pos) {
     for (int i = 0; i < m_voxels.size(); ++i) {
-        if (!m_voxels[i].visible) continue;
+        if (!m_voxels[i].visible) [[likely]] continue;
         glm::mat4 model = glm::translate(glm::mat4(1.0f), m_voxels[i].position);
+        model = glm::translate(model, pos);
 
         glUniformMatrix4fv(glGetUniformLocation(shaderID, "uModel"), 1, GL_FALSE, glm::value_ptr(model));
         glUniform3fv(glGetUniformLocation(shaderID, "uObjectColor"), 1, glm::value_ptr(m_voxels[i].color));
@@ -46,38 +47,54 @@ void Chunk::render(GLuint shaderID) {
 }
 
 void Chunk::init_voxels() {
-    for (int x = 0; x < m_CHUNK_SIZE; ++x)
+    srand(time(NULL));
+    m_voxel_positions.clear();
+    
+    for (int x = 0; x < m_CHUNK_SIZE; ++x) {
         for (int z = 0; z < m_CHUNK_SIZE; ++z) {
             for (int y = 0; y < m_CHUNK_SIZE; ++y) {
+                float r = rand() % 100;
                 Voxel vox = {
                     .position = glm::vec3{x, y, z},
-                    .color = glm::vec3{0.6f, 0.4, 0.4},
+                    .color = glm::vec3{r/100.0f, 0.4f, 0.4f},
                 };
                 m_voxels.push_back(std::move(vox));
+                m_voxel_positions.insert(glm::vec3{x, y, z});
             }
         }
+    }
 }
 
-bool Chunk::is_visible(const Voxel &vox) {
-    std::vector<glm::vec3> adjacent_positions = {
-        {vox.position.x - 1, vox.position.y, vox.position.z}, // left
-        {vox.position.x + 1, vox.position.y, vox.position.z}, // right
-        {vox.position.x, vox.position.y + 1, vox.position.z}, // up
-        {vox.position.x, vox.position.y - 1, vox.position.z}, // down
-        {vox.position.x, vox.position.y, vox.position.z + 1}, // front
-        {vox.position.x, vox.position.y, vox.position.z - 1}  // back
+bool Chunk::is_visible(const Voxel& vox) {
+    glm::ivec3 pos(static_cast<int>(vox.position.x),
+                   static_cast<int>(vox.position.y), 
+                   static_cast<int>(vox.position.z));
+    
+    std::array<glm::ivec3, 6> dirs = {
+        glm::ivec3(-1, 0, 0),   // left
+        glm::ivec3(1, 0, 0),    // right  
+        glm::ivec3(0, 1, 0),    // top
+        glm::ivec3(0, -1, 0),   // bottom
+        glm::ivec3(0, 0, 1),    // front
+        glm::ivec3(0, 0, -1)    // back
     };
-
-    for (const auto& pos : adjacent_positions) {
-        if (m_voxel_positions.find(pos) != m_voxel_positions.end()) {
-            return false;
+    
+    for (const auto& dir : dirs) {
+        glm::ivec3 neighbor = pos + dir;
+        
+        if (neighbor.x < 0 || neighbor.x >= m_CHUNK_SIZE ||
+            neighbor.y < 0 || neighbor.y >= m_CHUNK_SIZE ||
+            neighbor.z < 0 || neighbor.z >= m_CHUNK_SIZE) {
+            return true;
+        }
+        
+        if (m_voxel_positions.find(neighbor) == m_voxel_positions.end()) {
+            return true;
         }
     }
-
-    return true;
+    
+    return false;
 }
-
-
 
 void Chunk::update_visiblity() {
     for (auto &vox : m_voxels) {

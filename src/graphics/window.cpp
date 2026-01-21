@@ -68,6 +68,7 @@ void Window::set_size(std::pair<int, int> size) {
 
 void Window::set_title(const std::string &title) {
     m_title = title;
+    SDL_SetWindowTitle(m_native_window, m_title.c_str());
 }
 
 std::pair<int, int> Window::get_size() {

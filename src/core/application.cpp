@@ -80,7 +80,8 @@ void Application::logic() {
 void Application::render() {
     m_renderer->clear();
 
-    m_chunk->render(m_renderer->get_shader_id());
+
+    m_chunk->render(m_renderer->get_shader_id(), glm::vec3(0.0f, -16.0f, 0.0f));
 
     m_renderer->present(m_window->get_native_window());
 }
@@ -100,7 +101,7 @@ float Application::get_fps() {
         frameCount = 0;
         lastTime = currentTime;
 
-        std::cout << "[*] FPS: " << fps << std::endl;
+        m_window->set_title("Findit (" + std::to_string((int)fps) + ')');
     }
 
     return fps;
