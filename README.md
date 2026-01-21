@@ -16,11 +16,10 @@
 - **SDL** - окно и ввод
 - 
 ## Особенности реализации
-**Чанк 16³ → 4096 вокселей**
-**✓ Генерация позиций + цвет**          
-**✓ Culling по соседям (ivec3 hash)**  
-**✓ Индивидуальные матрицы model**     
-**✗ Greedy meshing / освещение**       
+**Чанк 16³ == 4096 вокселей**
+**Генерация позиций + цвет**          
+**Culling по соседям (ivec3 hash)**  
+**Индивидуальные матрицы model**
 
 ## Управление
 - **WASD** - движение
@@ -36,7 +35,7 @@ make -j$(nproc)
 ./findit
 ```
 
-**Статус:** Проект на паузе. Основа готова.~ 
-**Планы:** мир из чанков, текстуры, освещение.~
+**Статус:** Проект на паузе. Основа готова.
+**Планы:** мир из чанков, текстуры, освещение.
 
-[![GitHub](https://img.shields.io/badge/GitHub-@mewfl-black?logo=github)](https://github.com/mental0-main)~
+[![GitHub](https://img.shields.io/badge/GitHub-@mewfl-black?logo=github)](https://github.com/mental0-main)
