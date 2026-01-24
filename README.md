@@ -3,40 +3,40 @@
   <img src="screenshots/screenshot.png" alt="findit voxel game screenshot" width="800"/>
 </div>
 
-**Воксельный движок на C++** - экспериментальный проект для изучения воксельных чанков, рендеринга и оптимизации видимости.
+**The station engine in C++** is a pilot project for studying station angles, rendering and optimization of visibility.
 
-## Что это
-Простая воксельная песочница с чанками 16x16x16. Генерирует случайные кубы, реализует проверку видимости (culling скрытых граней), рендерит через OpenGL. Пока tech demo - база для будущей игры.
+## What is it
+Simple station sandbox with troughs 16x16x16. Generates random cubes, performs visibility checking (culling of hidden edges), renders via OpenGL. So far tech demo is the basis for a future game.
 
-## Используемые технологии
-- **C++17** - основа движка
-- **OpenGL 3.3+** - рендеринг кубов (VAO/VBO)
-- **GLM** - векторная математика, трансформации
-- **GLEW** - загрузка OpenGL функций
-- **SDL** - окно и ввод
-- **Икона** - помощь с выше
+## Technologies used
+- **C++17** - Engine Base
+- **OpenGL 3.3+** - Cube rendering (VAO/VBO)
+-**GLM** - vector mathematics, transformation
+- **GLEW** - OpenGL functions loading
+- **SDL** - window and input
+-**Icon** - help from above
 
-## Особенности реализации
-**Чанк 16³ == 4096 вокселей**
-**Генерация позиций + цвет**          
-**Culling по соседям (ivec3 hash)**  
-**Индивидуальные матрицы model**
+## Implementation Features
+**Chanc 163 == 4096 stations**
+**Generation of positions + color**                   
+**Culling by neighbors (ivec3 hash)**  
+**Custom matrices model**
 
-## Управление
-- **WASD** - движение
-- **Мышь** - обзор
-- **Esc** - выход
+## Management
+-**WASD** - movement
+- **Mouse** - overview
+- **Esc** - exit
 
-## Сборка (Linux)
-```bash
+## Build (Linux)
+`bash
 git clone https://github.com/mental0-main/findit.git && cd findit
 mkdir build && cd build
-cmake ..
+cmake .
 make -j$(nproc)
 ./findit
-```
+`
 
-**Статус:** Проект на паузе. Основа готова.
-**Планы:** мир из чанков, текстуры, освещение.
+**Status:** Project on pause. Base ready.
+**Plans:** The world of plates, textures, lighting.
 
-[![GitHub](https://img.shields.io/badge/GitHub-@mewfl-black?logo=github)](https://github.com/mental0-main)
+[! [GitHub](https://img.shields.io/badge/GitHub-@mewfl-black?logo=github)](https://github.com/mental0-main)
