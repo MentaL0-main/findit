@@ -29,14 +29,21 @@ Simple station sandbox with troughs 16x16x16. Generates random cubes, performs v
 
 ## Build (Linux)
 ```bash
+# Clone repo
 git clone https://github.com/mental0-main/findit.git && cd findit
+
+# Build
 mkdir build && cd build
 cmake .
 make -j$(nproc)
+
+# Run
 ./findit
 ```
 
-**Status:** Project on pause. Base ready.
-**Plans:** The world of plates, textures, lighting.
+## Other
+- **Status:** Project on pause. Base ready.
+- **Plans:** The world of plates, textures, lighting.
 
-[! [GitHub](https://img.shields.io/badge/GitHub-@mewfl-black?logo=github)](https://github.com/mental0-main)
+## License
+This project licensed under the **MIT License**.
