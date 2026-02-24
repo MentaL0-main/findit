@@ -28,13 +28,13 @@ Simple station sandbox with troughs 16x16x16. Generates random cubes, performs v
 - **Esc** - exit
 
 ## Build (Linux)
-`bash
+```bash
 git clone https://github.com/mental0-main/findit.git && cd findit
 mkdir build && cd build
 cmake .
 make -j$(nproc)
 ./findit
-`
+```
 
 **Status:** Project on pause. Base ready.
 **Plans:** The world of plates, textures, lighting.
